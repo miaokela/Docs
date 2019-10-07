@@ -27,7 +27,7 @@
 1.5 创建oracle用户与用户组
     groupadd oinstall
     groupadd dba
-    useradd -g oinstall -G dba
+    useradd -g oinstall -G dba oracle
     # 设置oracle用户密码
     passwd oracle
 1.6 修改oracle最大进程数
