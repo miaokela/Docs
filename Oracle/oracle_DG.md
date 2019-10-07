@@ -97,20 +97,11 @@
         dbca
 ```
 
-#### 1.2 搭建OracleDG
+
+## 2.搭建OracleDG
 ```
 参考博客：https://www.cnblogs.com/pymkl/articles/11340694.html
 ```
-
-
-
-
-
-
-
-
-## 2.OracleDG的配置
-
 
 
 
