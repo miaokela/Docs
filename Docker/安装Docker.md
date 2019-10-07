@@ -126,12 +126,6 @@ docker run -it centos:6.8 /bin/bash
 
 
 
-registry.cn-hangzhou.aliyuncs.com/tesunet/python:3.57
-
-#### 2.Windows下安装Docker
-
-
-
 
 
 
