@@ -21,6 +21,8 @@
     net.core.rmem_max = 4194304
     net.core.wmem_default = 262144
     net.core.wmem_max = 1048586
+    
+    sysctl -p
 1.4 修改/etc/pam.d/login，# vi /etc/pam.d/login,在文本末尾加上：
     session    required /lib64/security/pam_limits.so
     session    required pam_limits.so
