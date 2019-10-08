@@ -136,6 +136,9 @@ redis-server --service-install redis.windows.conf --loglevel verbose
             Require all granted  
         </Directory> 
  6.注意:不要导入	win_unicode_console
+ 7.将wkhtmltopdf应用软件拷贝至apache目录下
+    # 新建文件faconstor
+    拷贝static文件夹至faconstor
 ```
 
 
