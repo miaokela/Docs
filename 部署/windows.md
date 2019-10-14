@@ -16,6 +16,14 @@
     pip3 install -r requirements.txt
 5.手动下载并安装mod_wsgi    
     pip3 install mod_wsgi-4.5.24+ap24vc14-cp35-cp35m-win_amd64.whl
+    
+6.没网的情况下安装依赖包
+    # 下载
+    pip3 download -d C:\Users\Administrator\Desktop\package -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple/
+    # 安装
+    pip3 install --no-index --find-links=d:\python27\packs\ pandas （-r requirements.txt）
+    
+    
 ```
 
 #### 2.MySQL5.6安装
