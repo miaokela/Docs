@@ -135,12 +135,12 @@ docker run -it centos:6.8 /bin/bash
     # redis.conf文件内容自己配置
     docker run -p 6378:6379 --name tesudrm_redis -v $PWD/Redis/conf/redis.conf:/etc/redis/redis.conf \
                                                     -v $PWD/Redis/data:/data \
-                                                    -d redis:3.2
+                                                    -d redis:3.2 redis-server /etc/redis/redis.conf
 
 5.通过uwsgi启动django
     # mysql_server/redis_server 分别表示settings.py文件中mysql的host与redis的地址，即容器hosts机器名
     docker run -p 8000:8000 \
-               -v $PWD/TSDRM:/TSDRM
+               -v $PWD/TSDRM:/TSDRM \
                --link tesudrm_mysql:mysql_server \
                --link tesudrm_redis:redis_server \
                --name tesudrm_pro \
@@ -148,12 +148,12 @@ docker run -it centos:6.8 /bin/bash
 
 6.下拉nginx，并配置，后运行
     # nginx.conf文件内容自己配置，django_server为配置中的地址
-    docker run -v $PWD/Nginx/log:/var/log/nginx
-               -v $PWD/TSDRM/static:/static
-               --link tesudrm_pro:django_server
-               --name tesudrm_ngin
+    docker run -v $PWD/Nginx/nginx.conf:/etc/nginx/nginx.conf \
+               -v $PWD/Nginx/log:/var/log/nginx \
+               -v $PWD/TSDRM/static:/static \
+               --link tesudrm_pro:django_server \
+               --name tesudrm_nginx \
                -d -p 8888:80 nginx
-
 
 7.准备的文件目录
 ###################################
