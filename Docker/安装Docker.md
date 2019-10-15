@@ -154,6 +154,7 @@ docker run -it centos:6.8 /bin/bash
                --name tesudrm_ngin
                -d -p 8888:80 nginx
 
+
 7.准备的文件目录
 ###################################
 #   pro_tesu                      #
