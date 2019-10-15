@@ -121,6 +121,56 @@ docker run -it centos:6.8 /bin/bash
     docker tag registry.cn-qingdao.aliyuncs.com/tesunet/centos_py:[镜像版本号] centos_py:3.57
     docker run -it centos_py:3.57 /bin/bash
     pip3 list
+4.下拉mysql/redis，并配置，后运行
+    docker pull mysql:5.6
+    docker pull redis:3.2
+
+    cd pro_tesu
+
+    docker run -p 3307:3306 --name tesudrm_mysql -v $PWD/MySQL/conf.d:/etc/mysql/conf.d \
+                                                    -v $PWD/MySQL/logs:/logs \
+                                                    -v $PWD/MySQL/data:/var/lib/mysql \
+                                                    -e MYSQL_ROOT_PASSWORD=password \
+                                                    -d mysql:5.6
+    # redis.conf文件内容自己配置
+    docker run -p 6378:6379 --name tesudrm_redis -v $PWD/Redis/conf/redis.conf:/etc/redis/redis.conf \
+                                                    -v $PWD/Redis/data:/data \
+                                                    -d redis:3.2
+
+5.通过uwsgi启动django
+    # mysql_server/redis_server 分别表示settings.py文件中mysql的host与redis的地址，即容器hosts机器名
+    docker run -p 8000:8000 \
+               -v $PWD/TSDRM:/TSDRM
+               --link tesudrm_mysql:mysql_server \
+               --link tesudrm_redis:redis_server \
+               --name tesudrm_pro \
+               -itd centos_py:3.57
+
+6.下拉nginx，并配置，后运行
+    # nginx.conf文件内容自己配置，django_server为配置中的地址
+    docker run -v $PWD/Nginx/log:/var/log/nginx
+               -v $PWD/TSDRM/static:/static
+               --link tesudrm_pro:django_server
+               --name tesudrm_ngin
+               -d -p 8888:80 nginx
+
+7.准备的文件目录
+###################################
+#   pro_tesu                      #
+#      >> Redis                   #
+#           >> conf               #
+#               >> redis.conf     #
+#           >> data               #
+#      >> MySQL                   #
+#           >> conf.d             #
+#           >> logs               #
+#           >> data               #
+#           >> tesudrm.sql        #
+#      >> TSDRM                   #
+#      >> Nginx                   #
+#           >> log                #
+#           >> nginx.conf         #
+###################################
 
 ```
 
