@@ -9,8 +9,8 @@
   # 添加软件源
   sudo yum-config-manager --add-repo https://mirrors.ustc.edu.cn/docker-ce/linux/centos/docker-ce.repo
   # 更新缓存/安装docker ce
-  sudo yum makecache fast
-  sudo yum install docker-ce
+  sudo yum makecache fast -y
+  sudo yum install docker-ce -y
 2.启动docker ce
   sudo systemctl enable docker
   sudo systemctl start docker
@@ -45,7 +45,7 @@ docker run -it centos:6.8 /bin/bash
 3.在centos:6.8中安装python3.57
   3.1 下载python3.57
   3.2 将python3.57传到容器中
-    docker cp /root/Downloads/requirements.txt 05e0:/root/requirements.txt
+    docker cp /root/Downloads/Python-3.5.7.tgz 05e0:/root/
   3.3 安装python3.57
     一.更新系统软件包
     yum update -y
@@ -60,7 +60,7 @@ docker run -it centos:6.8 /bin/bash
     # 解压
     tar -zxvf Python-3.5.7.tgz
 
-    cd /Python-3.5.7
+    cd Python-3.5.7
     # 编译
     ./configure --prefix=/usr/local/python3
     make
@@ -107,19 +107,19 @@ docker run -it centos:6.8 /bin/bash
     # 先关闭容器
     docker stop 05e0
     # 基于当前容器重新创建镜像
-    docker commit -m "在centos6.8下搭建python环境" -a "root" -p 05e0 centos_py:3.56
+    docker commit -m "在centos6.8下搭建python环境" -a "root" -p 0eef examine_pro:1.0
     # -p表示提交时停止容器
 
     附录：使用第三方容器仓库：阿里云(需要先在阿里云镜像管理https://cr.console.aliyun.com中创建命名空间,一下tp_pro为命名空间)
-    $ sudo docker login --username=miaokela registry.cn-qingdao.aliyuncs.com
-    $ sudo docker tag [ImageId] registry.cn-qingdao.aliyuncs.com/tesunet/centos_py:[镜像版本号]
-    $ sudo docker push registry.cn-qingdao.aliyuncs.com/tesunet/centos_py:[镜像版本号]
+    $ sudo docker login --username=miaokela registry.cn-hangzhou.aliyuncs.com
+    $ sudo docker tag [ImageId] registry.cn-hangzhou.aliyuncs.com/tesunet/examine_pro:1.0
+    $ sudo docker push registry.cn-hangzhou.aliyuncs.com/tesunet/examine_pro:1.0
 
   7.从阿里云下载镜像
     # 创建容器,测试
-    $ sudo docker pull registry.cn-qingdao.aliyuncs.com/tesunet/centos_py:[镜像版本号]
-    docker tag registry.cn-qingdao.aliyuncs.com/tesunet/centos_py:[镜像版本号] centos_py:3.57
-    docker run -it centos_py:3.57 /bin/bash
+    docker pull registry.cn-hangzhou.aliyuncs.com/tesunet/examine_pro:1.0
+    docker tag registry.cn-hangzhou.aliyuncs.com/tesunet/examine_pro:1.0 examine_pro:1.0
+    docker run -it examine_pro:1.0 /bin/bash
     pip3 list
 4.下拉mysql/redis，并配置，后运行
     docker pull mysql:5.6
@@ -139,12 +139,13 @@ docker run -it centos:6.8 /bin/bash
 
 5.通过uwsgi启动django
     # mysql_server/redis_server 分别表示settings.py文件中mysql的host与redis的地址，即容器hosts机器名
+    ln -s /usr/local/python3/bin/uwsgi /usr/bin/uwsgi
     docker run -p 8000:8000 \
                -v $PWD/TSDRM:/TSDRM \
                --link tesudrm_mysql:mysql_server \
                --link tesudrm_redis:redis_server \
                --name tesudrm_pro \
-               -itd centos_py:3.57
+               -itd examine_pro:1.0
 
 6.下拉nginx，并配置，后运行
     # nginx.conf文件内容自己配置，django_server为配置中的地址
@@ -155,7 +156,7 @@ docker run -it centos:6.8 /bin/bash
                --name tesudrm_nginx \
                -d -p 8888:80 nginx
 
-7.准备的文件目录
+7.准备的文件目录(在/www/路径下创建)
 ###################################
 #   pro_tesu                      #
 #      >> Redis                   #
@@ -168,19 +169,13 @@ docker run -it centos:6.8 /bin/bash
 #           >> data               #
 #           >> tesudrm.sql        #
 #      >> TSDRM                   #
+#	    >> requirements.txt   #
 #      >> Nginx                   #
 #           >> log                #
 #           >> nginx.conf         #
 ###################################
 
 ```
-
-
-
-
-
-
-
 
 
 
