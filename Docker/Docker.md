@@ -145,7 +145,15 @@ docker run -it centos:6.8 /bin/bash
                --link tesudrm_mysql:mysql_server \
                --link tesudrm_redis:redis_server \
                --name tesudrm_pro \
-               -itd examine_pro:1.0
+               -itd examine_pro:1.1 \
+		sh -c 'cd /TSDRM/&&\
+		uwsgi --ini uwsgi.ini&&\
+		python3 manage.py celery multi start worker -A TSDRM -l info --logfile=/TSDRM/log/celerylog.log&&\
+		python3 manage.py celery multi start beat -A TSDRM -l info --logfile=/TSDRM/log/beat.log&&\
+		python3 manage.py celery -A TSDRM flower -l info'
+
+		uwsgi --ini uwsgi.ini&&\
+
 
 6.下拉nginx，并配置，后运行
     # nginx.conf文件内容自己配置，django_server为配置中的地址
@@ -179,9 +187,15 @@ docker run -it centos:6.8 /bin/bash
 
 
 
-
-
-
+docker run -p 8000:8000 -v $PWD/TSDRM:/TSDRM \
+               		--link tesudrm_mysql:mysql_server \
+               		--link tesudrm_redis:redis_server \
+               		--name tesudrm_pro \
+               		-d examine_pro:1.1 uwsgi --ini /TSDRM/uwsgi.ini \
+			sh -c 'python3 /TSDRM/manage.py celery -A TSDRM worker -l info'\
+			sh -c 'python3 /TSDRM/manage.py celery -A TSDRM flower -l info' \
+			sh -c 'python3 /TSDRM/manage.py celery -A TSDRM beat -l info'
+--logfile=./celerylog.log
 
 
 

@@ -21,7 +21,7 @@
     # 下载
     pip3 download -d C:\Users\Administrator\Desktop\package -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple/
     # 安装
-    pip3 install --no-index --find-links=d:\python27\packs\ pandas （-r requirements.txt）
+    pip3 install --no-index --find-links=C:\Users\Administrator\Desktop\package -r requirements.txt
     
     
 ```
@@ -94,7 +94,7 @@ redis-server --service-install redis.windows.conf --loglevel verbose
     Define SRVROOT "C:\Apache24"  #Apache24文件的路径，其余不用改。
     Listen 192.168.184.146:8000 #此处为你要发布的网站ip地址，此处我用我电脑的ip和端口，你也可以用127.0.0.1:8000用于本地测试；80端口自己设置
     ServerName 192.168.184.146:8000
-3.创建apache服务(管理员权限开启终端)   
+3.创建apache服务(管理员权限开启终端) # Define ENABLE_TLS13 "Yes"  
     httpd.exe -k install -n "apache2.4"  #apache2.4是所创建服务器名称，可更改。
     # 重启apache命令：httpd.exe -k restart
 4.访问测试：192.168.184.146:8000
@@ -121,7 +121,7 @@ redis-server --service-install redis.windows.conf --loglevel verbose
         # 注销掉物理路径
         # STATIC_ROOT,SITE_ROOT   
     
-    5.2 修改配置文件httpd.conf
+    5.2 修改配置文件httpd.conf mod_wsgi-express module-config
         #安装wsgi模块后，出来的三行字符，直接复制过来
         LoadFile "c:/application/python35/python35.dll"
         LoadModule wsgi_module "c:/application/python35/lib/site-packages/mod_wsgi/server/mod_wsgi.cp35-win_amd64.pyd"
@@ -143,6 +143,9 @@ redis-server --service-install redis.windows.conf --loglevel verbose
             Options None  
             Require all granted  
         </Directory> 
+    5.3 urls.py 静态文件反向代理
+        from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+        urlpatterns += staticfiles_urlpatterns()
  6.注意:不要导入	win_unicode_console
  7.将wkhtmltopdf应用软件拷贝至apache目录下
     # 新建文件faconstor
