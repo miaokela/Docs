@@ -146,10 +146,16 @@ redis-server --service-install redis.windows.conf --loglevel verbose
     5.3 urls.py 静态文件反向代理
         from django.contrib.staticfiles.urls import staticfiles_urlpatterns
         urlpatterns += staticfiles_urlpatterns()
- 6.注意:不要导入	win_unicode_console
- 7.将wkhtmltopdf应用软件拷贝至apache目录下
+6.注意:不要导入	win_unicode_console
+7.将wkhtmltopdf应用软件拷贝至apache目录下
     # 新建文件faconstor
     拷贝static文件夹至faconstor
+8.celery在windows下重启自动启动
+    进入文件夹:
+    win7:C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+    win10:C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp
+    放入bat脚本:
+    cmd /k "cd /d D:\Pros\TSDRM && python manage.py runserver"
 ```
 
 
