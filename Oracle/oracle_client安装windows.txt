@@ -1,0 +1,24 @@
+# 参考：https://www.cnblogs.com/mmz-tester/p/11122165.html
+
+# 安装包:
+cx_Oracle-5.3-11g.win32-py3.5.exe   # https://pypi.org/project/cx-Oracle/5.3/  双击安装
+instantclient-basic-win32-11.1.0.7.0.zip    # https://www.oracle.com/database/technologies/instant-client/microsoft-windows-32-downloads.html
+instantclient-sqlplus-win32-11.1.0.7.0.zip
+
+# 把下载的文件解压,
+# 复制oci，oraocci11，oraociei11的3个DLL粘贴到你的PY目录的Libs/site-packages文件夹下面。
+
+
+# 测试
+import cx_Oracle
+
+# 用自己的实际数据库用户名、密码、主机ip地址 替换即可
+conn = cx_Oracle.connect('scott/tiger@192.168.100.211/oracle')
+curs = conn.cursor()
+sql = 'select * from DEPT'  # sql语句
+rr = curs.execute(sql)
+row = curs.fetchone()
+print(row[0])
+curs.close()
+conn.close()
+
