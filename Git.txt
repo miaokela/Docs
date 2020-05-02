@@ -55,13 +55,12 @@ merge
 
 
 
-GitLeans 把这个单词改了，remote上也改 
+GitLens 能做什么？
 
 
 
 
-
-Git
+Git History能做什么？
 
 
 
