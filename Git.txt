@@ -55,13 +55,13 @@ merge
 
 
 
-GitbiubiubiubiubiuLens
+GitLeans 把这个单词改了，remote上也改 
 
 
 
 
 
-Git History
+Git
 
 
 
