@@ -1,0 +1,73 @@
+"""
+    VSCode使用Git
+"""
+Git已经装好了
+在全局配置一下你的名字和邮箱，有啥消息好通知你。
+```
+git config --global user.name "John Doe"
+git config --global user.email johndoe@example.com
+```
+
+不论是第一次将仓库放到Github还是克隆Github上已有仓库下来都可以通过以下方式：
+
+Github上手动建一个Repository，再克隆
+git clone https://github.com/miaokela/Docs.git
+~~~ 是不是很慢？
+毕竟Github是国外的网站，想快一点就需要有代理服务器。
+前提是，你得有代理服务器！！
+正好我有~~~
+
+对指定Github域名做代理：(1080是服务器代理的端口)
+git config --global http.https://github.com.proxy socks5://127.0.0.1:1080
+git config --global https.https://github.com.proxy socks5://127.0.0.1:1080
+
+然后再克隆：
+git clone https://github.com/miaokela/Docs.git
+
+快到飞起~~~
+
+要是没有代理服务器，可以尝试一下下面的方法：
+```
+windows下修改C:\Windows\System32\drivers\etc\hosts
+Linux/Mac下修改/etc/hosts
+
+151.101.77.194  github.global.ssl.fastly.net
+13.229.188.59   github.com
+185.199.109.153 assets-cdn.github.com
+151.101.76.249  global-ssl.fastly.net
+
+再刷新DNS缓存
+# windows
+ipconfig /flushdns
+# linux/mac
+sudo /etc/init.d/network-manager restart
+```
+
+常用VSCode下的Git操作
+stash/pop stash/pull/push
+merge
+
+本地代码修改完了，先stash储藏，再从远端pull下来别人修改的代码，
+再pop stash弹出储藏(期间可能需要处理冲突)，最后在暂存更改 -> 提交 -> push推送。
+处理冲突：在pop stash弹出储藏时会提示冲突，手动处理完之后再往下。
+
+
+
+
+
+GitLens
+
+
+
+
+
+Git History
+
+
+
+
+
+
+
+
+
