@@ -1,0 +1,299 @@
+不使用密码即可登陆：[oracle@oracle ~]$ sqlplus /as sysdba
+推荐大家学习：
+     1.ocp体系完整，可以明白里面到底有哪些东西，帮助我们建立课程体系大框架。
+            071  SQL(SQL基础) OCP课程不包括PL/SQL
+            052  体系结构（数据库逻辑结构和物理结构）
+            053管理（备份恢复、资源管理、优化）
+         考试形式：机考选择题，英文（单选、多选）
+         lz0-071   73道题  时间90分钟   满分100  分数线63    准被时间建议15天  (OCA)
+         lz0-052   75道题  时间100分钟 满分100  分数线66    准备时间建议30天
+         lz0-053   75道题  时间100分钟 满分100  分数线66    准备时间建议30天  (OCP)
+    
+      2.Linux系统是一切基础，从事Linux运维工程师，建议RHCE体系开始学。
+
+  体系结构的大错误：
+        初学者很容易犯的错误：基础不牢，一上来就搞RAC\DG\Weblogic等。
+        OCP课程全部都是单实例。
+       
+
+         数据库的三大文件： .dbf数据文件 .ctl控制文件    .log的日志文件
+        数据库五大后台进程： CKPT,DBWR,LGWR,SMON,RMON
+
+     备份：backup
+     还原：restore
+     恢复：recover
+  
+     比如每天的凌晨两点做一次全备份，假如数据库垮掉了；   //以下都是基于手动恢复，不是RMAN
+    1.找到最近的完全备份
+     2.在系统OS层面拷贝过去——还原restore
+    3.利用日志进行前滚恢复（归档或在线日志，里面很多）     //就是恢复离最近一次全备份到数据库垮掉这段时间的数据。
+
+     例：如果不小心使用Drop table xxx;直到晚上10十点才发现，，改怎么做？
+    1.首先对现在的数据库做全备份。
+    2.找到最近的还原文件做还原restore.
+    3.利用日志前滚（目的把xxx表找回来）
+   4.代开数据库利用数据泵EXPDP到处xxx表
+    5.重新还原restore刚刚做的全备份
+    6.再将之前的xxx表再IMPDP导入。
+   如果用闪回技术，闪回Drop。
+    show recyclebin;
+     flashback table tablename to before drop;
+
+     基础概念：      归档进程：ARCH  //第六个后台进程。
+    1.什么是日志：（日记）    //每天写日记得习惯很好
+        记录整个数据库得变更，什么时候创建了什么对象、删除什么对象、更改了生么对象。
+   2.重做日志得分类及概念：
+      分类有两种：1）联机重做日志（联机日志、在线日志）：
+                          2）归档重做日志（归档日志）
+      
+   3.非归档模式与归档模式
+             在线日志永远都是循环覆盖写。
+            非归档模式得数据库：指重做日志不备份，直接覆盖写。
+             归档模式得数据库：指重做日志要备份，才能覆盖写。
+   4.什么叫日志组及日志组成员？
+     在线日志通过日志组来管理。
+     数据库三大核心文件之一：联机日志，他是通过日志组管理，每个日志组中包含一个或多个日志组成员。
+   日志组是个逻辑概念，日志组成员是物理概念。
+  5.什么叫日志组切换？（日志组怎么切换）
+    当某个日志组写满之后（组里面的成员同时写，内容一致），由LGWR后台进程进行切换。切换得过程称之为日志组切换。
+   6.日志组得四种状态：
+      CURRENT:  数据库当前正在使用得日志组。
+      ACTIVE: 日志组切换成功，但数据依然再缓存种没有写入数据文件（没有刷入磁盘）日志不能覆盖。
+      INACTIVE:日志组切换成功，且数据已经从缓存中写入到数据文件中，日志可以被覆盖。
+      UNUSED:日志组从未被使用过（添加新的日志组或重建日志）。一旦使用将改变状态。
+
+     show v$log;           show v$logfile;
+
+    实战操作：
+   1）.如何去查询当前数据库是否位归档模式？
+      archive log list;    or(另一个)    select log_mode from v$database;      //ARCHIVELOG（归档模式或日志）
+     由归档模式改位非归档模式？                  查看数据库实例状态：select status from v$instance;
+         1.关闭数据库：shutdown immediate;
+         2.startup mount;
+         3.alter database noarchivelog;
+         4.alter database open;
+       由非归档改为归档模式？
+        1.关闭数据库：shutdown immediate;
+         2.startup mount;
+         3.alter database archivelog;
+         4.alter database open;
+        查看归档日志路径： show parameter log_archive_
+        修改归档日志路径：alter system set log_archive_dest_1='location=....';
+   2)如何查看日志组及日志组成员？
+        select a.group#,a.members,a.status,a.bytes/1024/1024 M,b.member from v$log a, v$logfile b
+        where a.group#=b.group# order by 1;
+  3)如何添加日志组及日志组成员？
+        1.如何添加日志组？
+        alter database add logfile group 4 'B:\app\Administrator\oradata\hj\DEO04.LOG' size 50m;  //单引号里指定内存地址
+       2.手动触发切换日志：  
+          alter system switch logfile;    //这是回发现正在使用的日志状态变为active
+         alter system checkpoint;   //触发一个完全检查，将内存中的归档日志写入磁盘中，将日志状态变为inactive可覆盖状态。
+        3.添加第五组，而且第五组里需要有两个成员？
+      alter database add logfile group 5 ('B:\app\Administrator\oradata\hj\DEO05a.LOG','B:\app\Administrator\oradata\hj\DEO05b.LOG') size 50m;
+        4.如何添加日志组成员：
+        alter database add logfile member 'B:\app\Administrator\oradata\hj\DEO01a.LOG' to group 1 ;
+         手工同步：alter system switch logfile;  要切换至新加成员组位正在使用状态，即可。
+    4）如何调整联机重做日志的大小？
+            需求：3个日志组（1，2，3），且每个日志组有两个成员，且为100M。
+            4.1 新建一个过度的临时日志组。
+                 alter  database add logfile group 6('','') size 200M;
+                  alter  database add logfile group 7('','') size 200M;    //这里我添加两组方便后面切换
+            4.2 手工切换日志组，并执行检查点，保证原日志处于INACTIVE状态。   切换到临时日志处于使用状态。
+                  切换日志：alter system switch logfie;
+                  执行检查点：alter system checkpoint;
+            4.3 删除原日志组。
+               alter database drop logfile group 1;
+               .......
+            4.4 删除原日志组的物理文件。
+            4.5按照需求重建日志组。
+ 	  alter  database add logfile group 1('B:\app\administrator\oradata\hj\DEDO01A.log','B:\app\administrator\oradata\hj\DEDO01A.log') size 100M;
+                  依次加入三组位置
+            4.6 手工切换日志组，并执行检查点，保证临时果如日志组处于INACTIVE状态。
+               切换日志; alter system switch logfile;
+               执行检查点;alter system checkpoint;
+            4.7删除临时过渡的日志组。
+            4.8 删除临时过渡组的物理文件。
+  
+           清除日志组：alter database clear logfile group 1;  //指的就是重建日志组。
+         5）INACTIVE  or UNUSED状态日志组损坏后该如何恢复？(先冷备)
+              SQL> alter database clear logfiel group 1;
+         
+         6)ACTIVE状态日志组损坏后该如何恢复？
+               刷新节点;alter system checkpoint;
+               清除日志：alter database clear logfile group 2;
+        
+           7)CURRENT状态日志损坏后如何恢复？
+               如果数据库没有反应过来，
+               1.切换日志 alter system switch logfile;
+               2.检查执行点：alter system checkpoint;
+               3.清除日志但不做归档：alter database clear unarchived logfile group 1;
+               意味着你的归档不连续，所以这个时候一定要做一个全备。
+
+    
+          归档日志命名方法：
+            %t_%s_%r.dbf
+             %t thread# 日志线程号
+             %s sequence 日志序列号
+             %r resetlog  数据库周期
+            SQL> alter system log-archive_format='name_%t_%s_%r.bak' scope=spfile;
+            完了之后需要重启数据库。
+
+           强制归档参数设置：
+              mandatory
+              alter system set log_archive_dest_1='location=c:\.....  mandatory';   //设置归档日志路径时加上mandatory 就会强制执行，如果日志没有写入磁盘不允许覆盖。
+  
+            控制文件的多路复用：
+              OCM考试，
+                  如何将控制文件多路服用（3路）？
+                      1.查目前的控制文件，怎么查？在哪儿？
+                            desc  v$controlfile;           //只是查看v$controlfile动态字典的字段
+                              select name from v$controlfile;
+                             还有一种方法 show parameter control;
+                             扩展：数据文件
+                              select name from v$datafile;
+                              在线日志文件 select member from v$logfile;
+                         2.改路径：alter system  set control_files='b:\app\administrator\oradata\hj\control01.ctl','...','....' scope = spfile;// 因为控制文件是静态的所系需要加scope = spfile
+                                     生产环境中三个路径尽量分开写。
+                          3.关闭数据库，并在指定位置创建控制文件，要与之前设置的位置名称一致（copy）。
+                 
+               数据库启动的三个阶段
+                      1.nomount
+                         startup nomount;
+                       2.mount
+                        alter database mount;
+                        3.open
+                       alter database open;
+                
+                 假如直接将数据库从shutdown 状态启动到mount状态；
+                       startup mount;               //会自动启动到nomount 再到mount阶段
+            数据字典：动态和静态，动态表示v$, 静态标识(dba_ all_  user_)
+                 select status from v$instance;   //实时反应实例的情况。
+
+
+       12C与11g区别：
+         管理角度来说，发生了变化，但对于应用程序来说，和之前一样。
+   
+        什么是CDB和PDB（12c中有）
+              CDB:Container Database  容器数据库。
+              PDB:Pluggable Database 可插入、插接式的（拔插数据库）
+         CDB和PDB之间的关系：
+        一个CDB中包含：
+              1.CDB$ROOT:根容器
+              2.PDB$SEED：不能动也不能删。相当于种子容器，帮助你创建其它PDB提供模板。
+              3.零个或多个用户PDBS.
+              4.包含0个或多个应用程序容器。
+           
+        Con_id 最小为0   表示的根容器。
+        Con_id---1:  表示CDB$ROOT
+        Con_id---2:   表示PDB$SEED
+
+    12.1版本中，一个CDB最多支持额外的252个PDBs
+12.2版本中，一个CDB最多支持额外的4k=4096个PDBs,加上根容器还有在种子容器，一共4098个
+
+四、12c两种管理架构模式：CDB和non-CDB
+  在11g中唯一支持数据库管理模式就是：non-CDB,我们为了区分12c之前和之后的区别，把旧的体系结构称之为叫非CDB模式。
+   非CDB概念：用作12.1之前版本的数据库的一种简称，采用的是12.1之前版本的体系结构
+   可根据业务需求把non-CDB转成CDB
+
+五、采用CDB有什么好处？
+   对多个数据库进行集中管理（备份、恢复、打补丁、升级）
+
+六、如何查看当前数据库是否为CDB？
+SQL> show pdbs;
+
+    CON_ID CON_NAME			  OPEN MODE  RESTRICTED
+---------- ------------------------------ ---------- ----------
+	 2 PDB$SEED			  READ ONLY  NO
+
+SQL> select dbid,name,con_id,cdb from v$database;
+
+      DBID NAME 	 CON_ID CDB
+---------- --------- ---------- ---
+1881619815 ORACLE	      0 YES                   //yes表示就是cdb
+
+七、如何在CDB和PDB之间切换。
+show con_name;
+
+CON_NAME
+------------------------------
+CDB$ROOT
+
+切换到其它的PDB命令 
+SQL> alter session set container=pdbname;
+切换到根容器里卖弄
+SQL> alter session set container=cdb$root;
+
+八、通过PDB$SEED快速创建PDB（clone）
+show parameter db_create //查看创建数据库的路劲，可以修改路径后在创建数据到相应的路径
+
+NAME				     TYPE	 VALUE
+------------------------------------ ----------- ------------------------------
+db_create_file_dest		     string	 +DATA             //vaule表示的既是路径
+db_create_online_log_dest_1	     string
+db_create_online_log_dest_2	     string
+db_create_online_log_dest_3	     string
+db_create_online_log_dest_4	     string
+db_create_online_log_dest_5	     string
+
+ 如果想要修改数据库路径：
+ cd /vaule路径下
+  创建一个文件夹：mkdir PDB514
+  修改创建数据库的路径：alter system set db_create_file_dest='/vaule/PDB514';
+创建数据库（pdb）
+SQL> create pluggable database pdb514 admin user oracle identified by oracle;
+
+Pluggable database created.
+
+ SQL> show pdbs;  //发现数据库是mounted状态
+
+    CON_ID CON_NAME			  OPEN MODE  RESTRICTED
+---------- ------------------------------ ---------- ----------
+	 2 PDB$SEED			  READ ONLY  NO
+	 3 PDB514			  MOUNTED
+ 将数据库pdb514打开到open状态：
+方法一：
+SQL> alter pluggable database pdb514 open;
+Pluggable database altered.
+方法二
+SQL> alter session set container=pdb514;
+
+Session altered.
+
+alter database open;
+
+
+1.参数文件和网络连接文件
+SQL> show parameter spfile;
+ 
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+spfile                               string      /u01/app/oracle/product/11.2.0/dbhome_2/dbs/spfiledemo.ora
+
+其他参数文件也同样位于$ORACLE_HOME/dbs目录中;
+网络连接文件位于$ORACLE_HOME/network/admin目录中;
+2.控制文件
+SQL> select * from v$controlfile;
+ 
+STATUS  NAME                                                                             IS_RECOVERY_DEST_FILE BLOCK_SIZE FILE_SIZE_BLKS
+------- -------------------------------------------------------------------------------- --------------------- ---------- --------------
+        /u01/app/oracle/oradata/demo/control01.ctl                                       NO                         16384            594
+        /u01/app/oracle/flash_recovery_area/demo/control02.ctl                           NO                         16384            594
+3.数据文件
+SQL> select FILE_NAME from dba_data_files;
+ 
+FILE_NAME
+--------------------------------------------------------------------------------
+/u01/app/oracle/oradata/demo/users01.dbf
+/u01/app/oracle/oradata/demo/undotbs01.dbf
+/u01/app/oracle/oradata/demo/sysaux01.dbf
+/u01/app/oracle/oradata/demo/system01.dbf
+/u01/app/oracle/oradata/demo/ivantable.dbf
+4.日志文件
+SQL> select * from v$logfile;
+ 
+    GROUP# STATUS  TYPE    MEMBER                                                                           IS_RECOVERY_DEST_FILE
+---------- ------- ------- -------------------------------------------------------------------------------- ---------------------
+         3         ONLINE  /u01/app/oracle/oradata/demo/redo03.log                                          NO
+         2         ONLINE  /u01/app/oracle/oradata/demo/redo02.log                                          NO
+         1         ONLINE  /u01/app/oracle/oradata/demo/redo01.log                                          NO
+       

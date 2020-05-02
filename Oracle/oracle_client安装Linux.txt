@@ -1,0 +1,73 @@
+## Linux下安装Oracle Client
+```
+1.下载oracle Client
+https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html
+
+2.安装脚本
+#!/bin/bash
+
+# INSTALL ORACLE INSTANT CLIENT #
+#################################
+
+# NOTE: Oracle requires at least 1176 MB of swap (or something around there).
+# If you are using CentOS in a VMWare VM, there's a good chance that you don't have enough by default.
+# If this describes you and you need to add more swap, see the
+# "Adding a Swap File to a CentOS System" section, here:
+# http://www.techotopia.com/index.php/Adding_and_Managing_CentOS_Swap_Space
+
+# Install basic dependencies
+sudo yum -y install libaio bc flex
+
+echo "Now go get some the following two RPMs ..."
+echo "- basic: oracle-instantclient11.2-basic-11.2.0.3.0-1.x86_64.rpm"
+echo "- SDK/devel: oracle-instantclient11.2-devel-11.2.0.3.0-1.x86_64.rpm"
+echo "... from this URL: http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html"
+echo "WARNING: It's pretty annoying, they make you sign up for an Oracle account, etc."
+echo 'I will assume you have put these two files are into ~/Downloads'
+echo "Press any key once you're ready" && read -n 1 -s
+
+sudo rpm -ivh ~/Downloads/oracle-instantclient11.*
+
+# SET ENVIRONMENT VARIABLES #
+#############################
+
+# Source for this section: http://cx-oracle.sourceforge.net/BUILD.txt
+
+# (SIDENOTE: I had to alter it by doing some digging around for where the Oracle RPMs really installed to;
+# if you ever need to do this, do a command like this:
+#     rpm -qlp )
+
+echo '# Convoluted undocumented Oracle bullshit.' >> $HOME/.bashrc
+echo 'export ORACLE_VERSION="11.1"' >> $HOME/.bashrc
+echo 'export ORACLE_HOME="/usr/lib/oracle/$ORACLE_VERSION/client64/"' >> $HOME/.bashrc
+echo 'export PATH=$PATH:"$ORACLE_HOME/bin"' >> $HOME/.bashrc
+echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$ORACLE_HOME/lib"' >> $HOME/.bashrc
+. $HOME/.bashrc
+
+# INSTALL cx_Oracle #
+#####################
+
+pip3 install cx_Oracle==5.2 -i https://pypi.tuna.tsinghua.edu.cn/simple/
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -30,7 +30,7 @@
 ```text
 1.添加mysql的bin目录至系统环境
     C:\Application\MySQL\mysql-5.6.45-winx64\bin
-2.创建一个my.ini的文件，放在bin目录里面，内容如下
+2.创建一个my.ini的文件，放在mysql目录里面，内容如下
     [mysql]
     # 设置mysql客户端默认字符集
     default-character-set=utf8 
@@ -47,6 +47,10 @@
     character-set-server=utf8
     # 创建新表时将使用的默认存储引擎
     default-storage-engine=INNODB
+    
+    wait_timeout=31536000 
+    interactive_timeout=31536000 
+
 3.初始化数据库、安装并启动服务
     mysqld --initialize-insecure  
     mysqld -install # 如果已存在，则删除：sc delete mysql  或者 mysql -remove

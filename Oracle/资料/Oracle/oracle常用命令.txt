@@ -1,0 +1,71 @@
+startup
+shutdownimmediate;
+开启和关闭oracle数据库
+
+alter database open resetlogs;
+回滚归档并且打开数据库
+
+sqlplus sys/密码@实例名 as sysdba;
+使用实例名连接oracle数据库
+
+select*fromv$version
+查看oracle位数
+1. 进入rman 
+2. rman  nocatalog     connect target /   
+3. crosscheck archivelog all;
+4. delete expired archivelog all
+删除表空间
+
+1.archive log list
+2.shutdown immediate
+3.startup mount
+4.alter database archivelog;  alter database noarchivelog
+5.archive log list
+5.alter database open
+开启归档模式
+
+select status from v$instance
+查看oracle状态
+1.lsnrctl start 
+会看到启动成功的界面;
+1.lsnrctl stop 
+停止监听器命令.
+1.lsnrctl status 
+查看监听器命令.
+select * from v$instance; 
+show parameter;
+echo $ORACLE_HOME
+查看oracle HOME路径
+show parameter db_recover
+查看归档路径
+SQL> alter system set log_archive_dest_1='location=D:\arch';
+修改归档路径
+alter system switch logfile;
+查看是否有归档日志生成
+alter system set db_recovery_file_dest_size=G;
+修改归档空间大小
+create table 表名(表名 格式);
+oracle插入一张表
+insert into 表名(内容);     commit;提交
+给表添加内容  
+
+
+
+SQL> alter tablespace 表空间名 begin backup;   end backup;  打开表空间 关闭表空间状态
+     
+
+SQL> select * from v$backup; 查看表空间状态
+
+
+cat/etc/group 
+查看分组
+echo $ORACLE_SID
+查看oracleSID
+
+进入oracle用户下用id查看oracle所属分组
+GID是组
+
+
+控制文件：二进制文件，记录数据库的名称、数据库文件存放路径等
+重做日志：不可缺少的文件，主要记录数据库的操作过程，用于备份恢复最新的数据
+spfile:oracled的参数文档

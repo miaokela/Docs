@@ -1,0 +1,8 @@
+     Oracle登陆方式：
+      1.cmd输入sqlplus   用户名:system as sysdba  密码：5200110hj
+      2.sqlplus scott/123456
+     查看用户：show user;
+      
+     如果用户已锁定，需要解锁：ALTER USER SCOTT ACCOUNT UNLOCK; //解锁SCOTT用户
+      修改用户密码:ALTER USER SCOTT IDENTIFIED BY 123456;  //设置SCOTT用户密码，  疑问，为什么密码中加入字符会错误。
+

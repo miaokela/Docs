@@ -1,0 +1,2 @@
+     查看scott用户下的所有表：
+            select * from tab;

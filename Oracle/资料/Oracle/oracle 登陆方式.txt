@@ -1,0 +1,63 @@
+linux登录 
+su - oracle
+sqlplus /nolog
+connect /as sysdba
+
+切换实例名：
+export ORACLE_SID=wxx
+查看实例名：
+echo $ORACLE_SID
+
+
+
+[oracle@test ~]$ sqlplus / as sysdba
+
+SQL*Plus: Release 11.2.0.1.0 Production on Sun Dec 23 05:11:47 2018
+
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
+
+Connected to an idle instance.
+
+SQL> startup open
+ORACLE instance started.
+
+Total System Global Area 1603411968 bytes
+Fixed Size                  2213776 bytes
+Variable Size             939526256 bytes
+Database Buffers          654311424 bytes
+Redo Buffers                7360512 bytes
+Database mounted.
+Database opened.
+
+sqlplus有几种登陆方式 比如：
+1.C: > sqlplus "/as sysdba"   --以操作系统权限认证的oracle sys管理员登陆
+
+2.C: > sqlplus /nolog             --不在cmd或者terminal当中暴露密码的登陆方式
+SQL> conn /as sysdba
+默认user-name:sqlplus
+password:as sysdba
+select status from v$instance;查看oracle （状态是否打开）
+
+查看是否归档>archive log list
+Database log mode              No Archive Mode(是否开启归档)
+Automatic archival             Disabled
+
+1.关闭数据库> shutdown immediate
+2.启动到mount状态> startup mount
+                alter databast mount
+3.修改为归档模式> alter database archivelog;
+打开数据库> alter database open;
+
+
+1. 进入rman 
+2. rman  nocatalog     connect target /   
+3. crosscheck archivelog all;
+4. delete expired archivelog all
+.更新归档日志
+RMAN> crosscheck archivelog all;
+RMAN> delete expired archivelog all; --中间会提示确认，输入"yes"即可
+7.退出rman
+RMAN> exit
+（执行一下交叉检查，清除数据库里面不存在的记录）
+
+备份rac实例要知道单节点oracle sys（最高权限） 密码

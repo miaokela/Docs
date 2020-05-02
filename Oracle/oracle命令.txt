@@ -1,0 +1,12 @@
+alter user scott account unlock;
+grant select on v_$database to scott;
+grant select on v_$instance to scott;
+
+
+SELECT database_role FROM v$database;
+SELECT status FROM v$instance
+SELECT switchover_status,database_role FROM v$database;
+
+
+
+
