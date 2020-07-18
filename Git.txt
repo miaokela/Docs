@@ -56,13 +56,6 @@ merge
 
 
 
-GitLens 能做什么？
-
-
-
-
-Git History能做什么？
-
 
 
 
